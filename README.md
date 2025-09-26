@@ -9,3 +9,7 @@ The system will:
 - 💻 Provide results through a **lightweight frontend**, enabling healthcare professionals and analysts to obtain quick risk estimates for better decision-making and early interventions.  
 
 ---
+## 🚀 Live Demo  
+You can try the app here:  
+
+👉 [Open Streamlit App](https://gtc-heart-disease-risk-prediction-lvnkbcpp7s6dpeu4izquhf.streamlit.app/)
