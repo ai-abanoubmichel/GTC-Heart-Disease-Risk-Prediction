@@ -3,7 +3,7 @@ import numpy as np
 import streamlit as st 
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC 
 import joblib
@@ -68,6 +68,9 @@ def feature_engineering_func(df):
     df['risk_score'] = df.apply(calculate_risk_score, axis=1)
     return df
 
+# Apply feature engineering to the dataset
+Heart_disease_processed = feature_engineering_func(Heart_disease)
+
 # ================================
 # Load or Train Model 
 # ================================
@@ -77,8 +80,8 @@ def load_model():
         clf = joblib.load("heart_disease_pipeline.pkl")
         return clf
     except:
-        X = Heart_disease.drop("target", axis=1)
-        y = Heart_disease["target"]
+        X = Heart_disease_processed.drop("target", axis=1)
+        y = Heart_disease_processed["target"]
         
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
         
@@ -94,7 +97,6 @@ def load_model():
         
         # Pipeline
         clf = Pipeline(steps=[
-            ('feature_engineering', FunctionTransformer(feature_engineering_func)),
             ('preprocessor', preprocessor),
             ('classifier', SVC(kernel='poly', gamma='scale', degree=3, C=1, probability=True))
         ])
@@ -157,28 +159,39 @@ with col2:
 thal = st.selectbox("Thalassemia (thal)", [0, 1, 2, 3])
 
 # ================================
-# Prepare input for prediction
+# Prepare input for prediction - APPLY FEATURE ENGINEERING
 # ================================
-input_data = pd.DataFrame([{
-    'age': age,
-    'cp': cp,
-    'chol': chol,
-    'restecg': restecg,
-    'exang': bool(exang),
-    'slope': slope,
-    'sex': bool(sex),
-    'trestbps': trestbps,
-    'fbs': bool(fbs),
-    'thalach': thalach,
-    'oldpeak': oldpeak,
-    'ca': ca,
-    'thal': thal
-}])
-
+def prepare_input_data(age, cp, chol, restecg, exang, slope, sex, trestbps, fbs, thalach, oldpeak, ca, thal):
+    # Create initial DataFrame
+    input_df = pd.DataFrame([{
+        'age': age,
+        'cp': cp,
+        'chol': chol,
+        'restecg': restecg,
+        'exang': bool(exang),
+        'slope': slope,
+        'sex': bool(sex),
+        'trestbps': trestbps,
+        'fbs': bool(fbs),
+        'thalach': thalach,
+        'oldpeak': oldpeak,
+        'ca': ca,
+        'thal': thal
+    }])
+    
+    # Apply the same feature engineering
+    input_df['age_group'] = input_df['age'].apply(categorize_age)
+    input_df['bp_category'] = input_df['trestbps'].apply(categorize_bp)
+    input_df['chol_category'] = input_df['chol'].apply(categorize_chol)
+    input_df['risk_score'] = input_df.apply(calculate_risk_score, axis=1)
+    
+    return input_df
 # ================================
 # Prediction
 # ================================
 if st.button("🔍 Predict"):
+    # Prepare input data with feature engineering
+    input_data = prepare_input_data(age, cp, chol, restecg, exang, slope, sex, trestbps, fbs, thalach, oldpeak, ca, thal)
     prediction = clf.predict(input_data)[0]
     if prediction:
         st.error("⚠️ High Risk: The model predicts a strong likelihood of heart disease.")
