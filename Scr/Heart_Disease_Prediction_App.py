@@ -11,7 +11,7 @@ import joblib
 # ================================
 # Load dataset
 # ================================
-Heart_disease = pd.read_csv(r"C:\Users\Eng.Abanoub\Desktop\ML_Projects\Internships_AI&ML\ML-Interns\2- GTC_ML_Intern_2025\Final_Project_Heart_Disease\GTC-Heart-Disease-Risk-Prediction\Heart_disease_cleveland_new.csv") 
+Heart_disease = pd.read_csv('GTC-Heart-Disease-Risk-Prediction\Datasets\Heart_disease_cleveland_new.csv') 
 
 # Set binary valued columns as bool
 Heart_disease['sex'] = Heart_disease['sex'].astype(bool)
@@ -101,10 +101,10 @@ clf = Pipeline(steps=[
 clf.fit(X_train, y_train)
 
 # Save pipeline
-joblib.dump(clf, "heart_disease_pipeline.pkl")
+joblib.dump(clf, "GTC-Heart-Disease-Risk-Prediction\Models\heart_disease_pipeline.pkl")
 
 # Load pipeline
-clf = joblib.load("heart_disease_pipeline.pkl")
+clf = joblib.load("GTC-Heart-Disease-Risk-Prediction\Models\heart_disease_pipeline.pkl")
 
 #set the browser tab title
 st.set_page_config(page_title="Heart Disease Prediction" ,layout="wide")
