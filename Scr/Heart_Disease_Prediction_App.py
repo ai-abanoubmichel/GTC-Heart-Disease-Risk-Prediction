@@ -106,7 +106,7 @@ def feature_engineering_func(df):
 # ================================
 # Load pipeline
 # ================================
-clf = joblib.load("Models/heart_disease_pipeline.pkl")
+clf = joblib.load("https://github.com/ai-abanoubmichel/GTC-Heart-Disease-Risk-Prediction/blob/main/Models/heart_disease_pipeline.pkl")
 
 #set the browser tab title
 st.set_page_config(page_title="Heart Disease Prediction" ,layout="wide")
