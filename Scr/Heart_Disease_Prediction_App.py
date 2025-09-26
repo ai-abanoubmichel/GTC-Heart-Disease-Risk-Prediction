@@ -68,45 +68,48 @@ def feature_engineering_func(df):
     df['risk_score'] = df.apply(calculate_risk_score, axis=1)
     return df
 
-# # ================================
-# # Prepare data
-# # ================================
-# X = Heart_disease.drop("target", axis=1)
-# y = Heart_disease["target"]
-
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
-# # ================================
-# # Preprocessing
-# # ================================
-# categorical_cols = ['sex', 'cp', 'fbs', 'restecg', 'exang', 'slope', 
-#                     'ca', 'thal', 'age_group', 'bp_category', 'chol_category']
-# numeric_cols = ['age', 'trestbps', 'chol', 'thalach', 'oldpeak', 'risk_score']
-
-# preprocessor = ColumnTransformer([
-#     ('num', StandardScaler(), numeric_cols),
-#     ('cat', OneHotEncoder(drop='first' , handle_unknown='ignore'), categorical_cols)
-# ])
-
-# # ================================
-# # Pipeline
-# # ================================
-# clf = Pipeline(steps=[
-#     ('feature_engineering', FunctionTransformer(feature_engineering_func)),
-#     ('preprocessor', preprocessor),
-#     ('classifier', SVC(kernel='poly', gamma='scale', degree=3, C=1))
-# ])
-
-# # Train model
-# clf.fit(X_train, y_train)
-
-# # Save pipeline
-# joblib.dump(clf, "heart_disease_pipeline.pkl")
-
 # ================================
+# Load or Train Model 
+# ================================
+@st.cache_resource
+def load_model():
+    try:
+        clf = joblib.load("heart_disease_pipeline.pkl")
+        return clf
+    except:
+        X = Heart_disease.drop("target", axis=1)
+        y = Heart_disease["target"]
+        
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+        
+        # Preprocessing
+        categorical_cols = ['sex', 'cp', 'fbs', 'restecg', 'exang', 'slope', 
+                           'ca', 'thal', 'age_group', 'bp_category', 'chol_category']
+        numeric_cols = ['age', 'trestbps', 'chol', 'thalach', 'oldpeak', 'risk_score']
+        
+        preprocessor = ColumnTransformer([
+            ('num', StandardScaler(), numeric_cols),
+            ('cat', OneHotEncoder(drop='first', handle_unknown='ignore'), categorical_cols)
+        ])
+        
+        # Pipeline
+        clf = Pipeline(steps=[
+            ('feature_engineering', FunctionTransformer(feature_engineering_func)),
+            ('preprocessor', preprocessor),
+            ('classifier', SVC(kernel='poly', gamma='scale', degree=3, C=1, probability=True))
+        ])
+        
+        # Train model
+        clf.fit(X_train, y_train)
+        
+        # Save pipeline
+        joblib.dump(clf, "heart_disease_pipeline.pkl")
+        
+        return clf
+
+
 # Load pipeline
-# ================================
-clf = joblib.load("Models/heart_disease_pipeline.pkl")
+clf = load_model()
 
 #set the browser tab title
 st.set_page_config(page_title="Heart Disease Prediction" ,layout="wide")
